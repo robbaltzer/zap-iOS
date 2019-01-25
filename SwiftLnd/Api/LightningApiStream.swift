@@ -64,10 +64,7 @@ public final class LightningApiStream: LightningApiProtocol {
     
     public func pendingChannels(completion: @escaping (Result<[Channel]>) -> Void) {
         LndmobilePendingChannels(nil, StreamCallback<LNDPendingChannelsResponse, [Channel]>(completion) {
-            let pendingOpenChannels: [Channel] = $0.pendingOpenChannels.compactMap { $0.channelModel }
-            let pendingClosingChannels: [Channel] = $0.pendingClosingChannels.compactMap { $0.channelModel }
-            let pendingForceClosingChannels: [Channel] = $0.pendingForceClosingChannels.compactMap { $0.channelModel }
-            return pendingOpenChannels + pendingClosingChannels + pendingForceClosingChannels
+            $0.channels
         })
     }
     
@@ -118,6 +115,9 @@ public final class LightningApiStream: LightningApiProtocol {
     }
     
     public func invoices(completion: @escaping (Result<[Invoice]>) -> Void) {
+        let request = LNDListInvoiceRequest()
+        request.reversed = true
+        let data = try? request.serializedData()
         LndmobileListInvoices(nil, StreamCallback<LNDListInvoiceResponse, [Invoice]>(completion) {
             $0.invoices.compactMap(Invoice.init)
         })
